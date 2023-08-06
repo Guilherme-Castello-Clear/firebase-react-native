@@ -1,19 +1,28 @@
 import React, { useState, useEffect} from 'react';
-import { View, Text, StyleSheet, Button, TextInput } from 'react-native';
-
+import { View, Text, StyleSheet, Button, TextInput, FlatList } from 'react-native';
+import Listagem from './src/Listagem';
 import firebase from './src/firebaseConnection';
 
 export default function App(){
   const [nome, setNome] = useState('Carregando...');
   const [cargo, setCargo] = useState('');
-  
+  const [usuarios, setUsuarios] = useState([])
+
   useEffect(()=> {
     async function dados(){
-      await firebase.database().ref('tipo').set('Cliente')
-      await firebase.database().ref('tipo').remove()
-      await firebase.database().ref('usuarios').child(3).update({
-        nome: 'Castello',
+      
+      await firebase.database().ref('usuario').on('value', snapshot => {
+        setUsuarios([])
+        snapshot.forEach(childItem => {
+          let data = {
+            key: childItem.key,
+            nome: childItem.val().nome,
+            cargo: childItem.val().cargo,
+          }
+          setUsuarios([oldArray => [...oldArray, data]])
+        })
       })
+
     }
     dados();
   }, []);
@@ -50,6 +59,13 @@ export default function App(){
         title="Adicionar Funcionario"
         onPress={cadastrar}
       />
+
+      <FlatList
+        keyExtractor={item => item.key}
+        data={usuarios}
+        renderItem={item => (<Listagem data={item}/>)}
+      />
+
     </View>
   );
 }
