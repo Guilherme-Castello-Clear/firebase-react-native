@@ -1,42 +1,20 @@
 import React, { useState, useEffect} from 'react';
 import { View, Text, StyleSheet, Button, TextInput, FlatList } from 'react-native';
-import Listagem from './src/Listagem';
 import firebase from './src/firebaseConnection';
 
 export default function App(){
-  const [nome, setNome] = useState('Carregando...');
-  const [cargo, setCargo] = useState('');
-  const [usuarios, setUsuarios] = useState([])
-
-  useEffect(()=> {
-    async function dados(){
-      
-      await firebase.database().ref('usuario').on('value', snapshot => {
-        setUsuarios([])
-        snapshot.forEach(childItem => {
-          let data = {
-            key: childItem.key,
-            nome: childItem.val().nome,
-            cargo: childItem.val().cargo,
-          }
-          setUsuarios([oldArray => [...oldArray, data]])
-        })
-      })
-
-    }
-    dados();
-  }, []);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('')
 
   async function cadastrar(){
-    if(nome !== '' & cargo !== ''){
-      let usuarios = await firebase.database().ref('usuarios');
-      let chave = usuarios.push().key
-
-      usuarios.child(chave).set({
-        nome: nome,
-        cargo: cargo,
-      })
-    }
+    await firebase.auth().createUserWithEmailAndPassword(email, password).then(value =>{
+      alert('Usuario criado: '+ value.user.email)
+    }).catch(error => {
+      if(error.code === 'auth/weak-password'){
+        alert('Sua senha deve ter pelo menos 6 caracteres')
+        return
+      }
+    })
   }
 
   return(
@@ -45,18 +23,18 @@ export default function App(){
       <TextInput
         style={styles.input}
         underlineColorAndroid="transparent"
-        onChangeText={(texto) => setNome(texto)}
+        onChangeText={(email) => setEmail(email)}
       />
 
       <Text style={styles.texto}>Cargo</Text>
       <TextInput
         style={styles.input}
         underlineColorAndroid="transparent"
-        onChangeText={(texto) => setCargo(texto)}
+        onChangeText={(password) => setPassword(password)}
       />
 
       <Button
-        title="Adicionar Funcionario"
+        title="Cadastrar"
         onPress={cadastrar}
       />
 
