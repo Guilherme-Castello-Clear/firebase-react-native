@@ -5,16 +5,21 @@ import firebase from './src/firebaseConnection';
 export default function App(){
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('')
+  const [user, setUser] = useState('')
 
-  async function cadastrar(){
-    await firebase.auth().createUserWithEmailAndPassword(email, password).then(value =>{
-      alert('Usuario criado: '+ value.user.email)
+  async function logar(){
+    await firebase.auth().signInWithEmailAndPassword(email, password).then(value =>{
+      alert('Seja bem vindo, '+ value.user.email)
+      setUser(value.user.email)
     }).catch(error => {
-      if(error.code === 'auth/weak-password'){
-        alert('Sua senha deve ter pelo menos 6 caracteres')
-        return
-      }
+      alert('Algo deu errado')
     })
+  }
+
+  async function logout(){
+    await firebase.auth().signOut();
+    setUser('')
+    alert('Deslogado com sucesso')
   }
 
   return(
@@ -34,8 +39,8 @@ export default function App(){
       />
 
       <Button
-        title="Cadastrar"
-        onPress={cadastrar}
+        title="Logar"
+        onPress={logar}
       />
 
       <FlatList
@@ -43,6 +48,14 @@ export default function App(){
         data={usuarios}
         renderItem={item => (<Listagem data={item}/>)}
       />
+
+      <Text>
+        {user}
+      </Text>
+      {user.length > 0 && <Button
+        title="Logout"
+        onPress={logout}
+      />}
 
     </View>
   );
