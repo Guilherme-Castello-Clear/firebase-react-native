@@ -8,8 +8,29 @@ export default function App(){
 
   const [user, setUser] = useState(null)
   const [newTask, setNewTask] = useState()
-
   const [tasks, setTasks] = useState([])
+  
+  useEffect(() => {
+
+    function getUser(){
+      if(!user){
+        return;
+      }
+      firebase.database().ref('tarefas').child(user).once('value', snap => {
+        setTasks([]);
+        snap?.forEach((childItem) => {
+          let data = {
+            key: childItem.key,
+            nome: childItem.val().nome
+          }
+          setTasks(oldTasks => [...oldTasks, data])
+        })
+      })
+    }
+
+    getUser()
+  
+  }, [user])
 
   function handleAdd(){
     if(newTask === ''){
