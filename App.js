@@ -53,7 +53,10 @@ export default function App(){
   }
 
   function handleDelete(key){
-    console.log(key)
+    firebase.database().ref('tarefas').child(user).child(key).remove().then(snap => {
+      const findTasks = tasks.filter( item => item.key !== key)
+      setTasks(findTasks)
+    })
   }
 
   function handleEdit(key){
